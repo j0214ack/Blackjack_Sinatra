@@ -24,6 +24,16 @@ class Card
   def order
     FACES.index(face)
   end
+
+  # in order to become a key in a Hash
+  def eql?(other)
+    suit == other.suit
+    face == other.face
+  end
+
+  def hash
+    [suit, face].hash
+  end
 end
 
 class Deck
@@ -45,7 +55,7 @@ class Deck
 
   def to_cookie
     deck_cookie = { deck_num: deck_num }
-    Card::SUIT.keys.each do |suit|
+    Card::SUITS.keys.each do |suit|
       deck_cookie[suit] = count_feature(suit)
     end
     deck_cookie
@@ -61,11 +71,11 @@ class Deck
 
   def self.cookie_construct(cookie_value)
     new_deck = self.new
-    new_deck.deck_num = cookie_value[:deck_num]
+    new_deck.deck_num = deck_num = cookie_value[:deck_num]
     Card::SUITS.keys.each do |suit|
       feature_value = cookie_value[suit]
-      Card::FACES.each_with_index do |face, index|
-        new_deck[Card.new(suit,face)] = ((feature_value % (deck_num + 1)) / (deck_num + 1) ** index).round
+      Card::FACES.each do |face|
+        new_deck.cards[Card.new(suit,face)] = feature_value % (deck_num + 1)
         feature_value /= (deck_num + 1)
       end
     end
@@ -73,7 +83,7 @@ class Deck
   end
 
   def deal_a_card
-    card = cards.select{|card,num| num > 0}.keys.samle
+    card = cards.select{|card,num| num > 0}.keys.sample
     cards[card] -= 1
     card
   end

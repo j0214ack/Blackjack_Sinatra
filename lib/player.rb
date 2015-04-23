@@ -3,25 +3,25 @@ require_relative 'hand'
 
 class Player
   include HasHand
-  attr_accessor :money, :bets, :name
+  attr_accessor :money, :bets, :name, :choice
   
   def initialize(name,money)
     @hand = []
     @bets = 0
     @money = money.to_i
     @name = name
+    @choice = ''
   end
 
-  def hit_or_stand
-    if total_points == 21
-      #puts "You have a blackjack!"
-      return 's'
+  def choice
+    case @choice
+    when 's'
+      'Stay'
+    when 'h'
+      'Hit'
+    else
+      ''
     end
-    begin
-      #puts "#{name}, do you wish to 1) hit or, 2) stand?"
-      choice = gets.chomp
-    end until %w(1 2).include? choice
-    choice == '1' ? 'h' : 's'
   end
 
   def bet(amount)

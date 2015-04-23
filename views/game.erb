@@ -1,1 +1,19 @@
-<h1>Welcome to game table!</h1>
+<h1>Welcome to game table, <%=@player.name%>!</h1>
+<h2>You bet $<%=@player.bets%></h2>
+<% unless @player.choice == '' %>
+  <h2>You chose <%= @player.choice %> </h2>
+<% end %>
+
+<p>
+  Dealer's hand: <br>
+  <%= @dealer.show_hand%> <br>
+  Your hand: <br>
+  <%= @player.show_hand%> <br>
+</p>
+
+<% if @game_stage == GAME_STAGES[:turn_player] %>
+  <form action="/game/hit_or_stay" method="post">
+    <button type="submit" value="h" name="hit_or_stay">Hit</button>
+    <button type="submit" value="s" name="hit_or_stay">Stay</button>
+  </form>
+<% end %>

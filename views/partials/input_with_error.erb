@@ -1,0 +1,10 @@
+<% unless @input_error %>
+  <input type=<%=type%> name=<%=name%>> <br>
+<% else %>
+  <div class="control-group error">
+    <div class="controls">
+      <input type=<%=type%> name=<%=name%>>
+      <span class="help-inline"><%=@input_error%></span>
+    </div>
+  </div>
+<% end %>
