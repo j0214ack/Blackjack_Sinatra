@@ -13,11 +13,42 @@ class Card
     "🂠 #{SUITS[suit]}#{face}"
   end
 
+  def to_url
+    result = ""
+    case suit
+    when 's'
+      result += "spades_"
+    when 'h'
+      result += "hearts_"
+    when 'd'
+      result += "diamonds_"
+    when 'c'
+      result += "clubs_"
+    end
+
+    case face
+    when "A"
+      result += "ace"
+    when "T"
+      result += "10"
+    when "J"
+      result += "jack"
+    when "Q"
+      result += "queen"
+    when "K"
+      result += "king"
+    else
+      result += face
+    end
+
+    result += ".jpg"
+  end
+
   def to_points
     case face
     when 'J', 'Q', 'K' then 10
     when 'A' then 1
-    else face + 1
+    else FACES.index(face) + 1
     end
   end
 

@@ -1,17 +1,25 @@
-<h1>Welcome to game table, <%=@player.name%>!</h1>
-<h2>You bet $<%=@player.bets%></h2>
-<% unless @player.choice == '' %>
-  <h2>You chose <%= @player.choice %> </h2>
+<h1>Welcome to game table, <%=session[:player].name%>!</h1>
+<h2>You bet $<%=session[:player].bets%></h2>
+<% unless session[:player].choice == '' %>
+  <h2>You chose <%= session[:player].choice %> </h2>
 <% end %>
 
-<p>
-  Dealer's hand: <br>
-  <%= @dealer.show_hand%> <br>
-  Your hand: <br>
-  <%= @player.show_hand%> <br>
-</p>
+<% if @show_continue %>
+  <%= erb :"partials/continue"%>
+<% end %>
 
-<% if @game_stage == GAME_STAGES[:turn_player] %>
+<br>
+
+<% if session[:dealer] && session[:player] %>
+  <p>
+    Dealer's hand: <br>
+    <%= session[:dealer].show_hand%> <br>
+    Your hand: <br>
+    <%= session[:player].show_hand%> <br>
+  </p>
+<% end %>
+
+<% if @show_hit_or_stay %>
   <form action="/game/hit_or_stay" method="post">
     <button type="submit" value="h" name="hit_or_stay">Hit</button>
     <button type="submit" value="s" name="hit_or_stay">Stay</button>

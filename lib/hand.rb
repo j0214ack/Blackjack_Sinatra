@@ -25,10 +25,15 @@ module HasHand
     hand.clear
   end
 
-  def show_hand(hide_fisrt_card = false)
-    cards_strings = hand.map{ |card| card.to_s }
-    cards_strings[0] = "🂠 ??" if hide_fisrt_card
-    cards_strings.join(" | ")
+  #def show_hand(hide_fisrt_card = false)
+    #cards_strings = hand.map{ |card| card.to_s }
+    #cards_strings[0] = "🂠 ??" if hide_fisrt_card
+    #cards_strings.join(" | ")
+  #end
+  
+  def show_hand(hide_first_card = false)
+    cards_urls = hand.map{ |card| card.to_url }
+    cards_urls[0] = "/images/cards/cover.jpg"
   end
 
   def add_a_card(card)

@@ -1,8 +1,8 @@
-<h1><%= "#{@player.name}!"%> Make your bet!</h1>
-<h2>You have $<%="#{@player.money}"%></h2>
-<% if @player.bets > 0 %>
+<h1><%= "#{session[:player].name}!"%> Make your bet!</h1>
+<h2>You have $<%="#{session[:player].money}"%></h2>
+<% if session[:player].bets > 0 %>
   <p>
-    You are currently in a game with $<%=@player.bets%>. <br>
+    You are currently in a game with $<%=session[:player].bets%>. <br>
     If you want to continue on playing, click <a href="/game">here.</a> <br>
     Otherwise you'll lose all your current bets. <br>
   </p>
