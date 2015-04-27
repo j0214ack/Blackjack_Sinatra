@@ -16,13 +16,13 @@ class Card
   def to_url
     result = ""
     case suit
-    when 's'
+    when :s
       result += "spades_"
-    when 'h'
+    when :h
       result += "hearts_"
-    when 'd'
+    when :d
       result += "diamonds_"
-    when 'c'
+    when :c
       result += "clubs_"
     end
 
@@ -41,7 +41,7 @@ class Card
       result += face
     end
 
-    result += ".jpg"
+    result = "/images/cards/#{result}.jpg"
   end
 
   def to_points

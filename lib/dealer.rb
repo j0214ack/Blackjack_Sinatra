@@ -3,17 +3,19 @@ require_relative 'hand'
 
 class Dealer
   include HasHand
+  attr_accessor :choice
 
   def initialize
     @hand = []
   end
 
-  def hit_or_stand
+  def hit_or_stay
     if total_points < 17
-      'h'
+      self.choice = 'h'
     else
-      's'
+      self.choice = 's'
     end
+    choice
   end
 
   def show_hand(hide = true)

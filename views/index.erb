@@ -1,4 +1,4 @@
-<h1>Hello <%= @player.name %>!</h1>
-<h1>You Have $<%= @player.money %></h1>
+<h1>Hello <%= session[:player].name %>!</h1>
+<h1>You Have $<%= session[:player].money %></h1>
 <form action="/new_player" method="get"><button type="submit">New game</button></form>
 <form action="/game" method="get"><button type="submit">Continue on playing</button></form>

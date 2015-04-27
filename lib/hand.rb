@@ -33,7 +33,8 @@ module HasHand
   
   def show_hand(hide_first_card = false)
     cards_urls = hand.map{ |card| card.to_url }
-    cards_urls[0] = "/images/cards/cover.jpg"
+    cards_urls[0] = "/images/cards/cover.jpg" if hide_first_card
+    cards_urls
   end
 
   def add_a_card(card)
