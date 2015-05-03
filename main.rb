@@ -17,20 +17,138 @@ helpers do
     redirect '/game/bets' if session['player'].bets == 0
   end
 
-  def rebuild_deck
-    @deck = Deck.cookie_construct(session['deck'])
+  def build_deck(new_deck = false)
+    if session['deck'] && !new_deck
+      @deck = Deck.cookie_construct(session['deck'])
+    else
+      @deck = Deck.new(4)
+    end
+  end
+
+  def all_player_clear_hand
+    session['dealer'].clear_hand
+    session['player'].clear_hand
+  end
+
+  def deal_flop
+    all_player_clear_hand
+    2.times do
+      session['dealer'].add_a_card(@deck.deal_a_card)
+      session['player'].add_a_card(@deck.deal_a_card)
+    end
+  end
+
+  def player_lose
+    bets = session['player'].bets
+    session['player'].lose
+    @result_msg = "You lost! You lost your $#{bets}."
+    @result_type = "error"
+  end
+
+  def player_win
+    bets = session['player'].bets
+    session['player'].win
+    @result_msg = "You won! You get $#{bets} more."
+    @result_type = "success"
+  end
+
+  def player_push
+    bets = session['player'].bets
+    session['player'].push
+    @result_msg = "You pushed with dealer! You get $#{bets} back."
+    @result_type = "info"
+  end
+
+  def result
+    @hide_fisrt_dealer_card = false
+    session['ending_round'] = true
+    @show_result = true
+    if session['player'].busted?
+      player_lose
+    elsif session['dealer'].busted?
+      player_win
+    else
+      case session['player'].total_points <=> session['dealer'].total_points
+      when 1 then player_win
+      when 0 then player_push
+      when -1 then player_lose
+      end
+    end
+    session['player'].choice = ''
+  end
+
+  def continue_on_gaming
+    session['dealer'] = Dealer.new unless session['dealer']
+    if !session['player'].flop_dealt? || !session['dealer'].flop_dealt?
+      deal_flop
+      if session['dealer'].blackjack?
+        @dealer_say = "Sorry! I have blackjack!"
+        result
+      else
+        @show_player_turn = true
+      end
+    elsif session['player'].my_turn?
+      @show_player_turn = true
+    elsif session['dealer'].my_turn?
+      @show_dealer_turn = true
+    elsif session["ending_round"]
+      result
+    end
+  end
+
+  def dealer_turn
+    @hide_fisrt_dealer_card = false
+    if session['dealer'].hit_or_stay == 'h'
+      session['dealer'].add_a_card(@deck.deal_a_card)
+      if session['dealer'].busted?
+        @dealer_say = "I chose to hit.\n Oops, I am busted."
+        @show_result = true
+        result
+      else
+        @dealer_say = "I chose to hit."
+        @show_dealer_turn = true
+      end
+    elsif session['dealer'].hit_or_stay == 's'
+      @dealer_say = "I chose to stay."
+      @show_result = true
+      result
+    end
+  end
+
+  def player_turn
+    if params['hit_or_stay'] == 'h'
+      if session['player'].busted?
+        @dealer_say = "You've already busted. Don't cheat!."
+        continue_on_gaming
+      elsif session['player'].choice == 's'
+        @dealer_say = "You've already chose to stay. Don't cheat!"
+        continue_on_gaming
+      else
+        session['player'].add_a_card(@deck.deal_a_card)
+        if session['player'].busted?
+          @dealer_say = "You're busted! You lost."
+          session['player'].choice = "s"
+          result
+        else
+          @show_player_turn = true
+          session['player'].choice = 'h'
+        end
+      end
+    elsif params['hit_or_stay'] == 's'
+      session['player'].choice = 's'
+      @dealer_say = "You chose to stay. Then it's my turn."
+      @show_dealer_turn = true
+    end
   end
 
 end # helpers do
 
 before do
-  pass if request.path_info == "/new_player"
-  check_player
-  pass if request.path_info == "/game/bets"
-  check_bets
+  @hide_fisrt_dealer_card = true
 end
 
 get '/' do
+  check_player
   erb :index
 end
 
@@ -52,22 +170,49 @@ post '/new_player' do
 end
 
 get '/game' do
+  check_player
+  check_bets
+  build_deck
+  continue_on_gaming
+  session['deck'] = @deck.to_cookie
+
+  erb :game
 end
 
-post '/game/continue' do
-  session[:game_stage] = params[:change_to_stage]
-  game_play
-  redirect :game
+post '/game/new' do
+  check_player
+  if session['ending_round'] == true
+    session['ending_round'] = false
+    all_player_clear_hand
+    redirect "/game/bets"
+  else
+    redirect "/game"
+  end
 end
 
-post '/game/hit_or_stay' do
+post '/game' do
+  check_player
+  check_bets
+  build_deck
+  if params['turn'] == "player_turn"
+    player_turn
+  elsif params['turn'] == "dealer_turn"
+    dealer_turn
+  else
+    redirect '/game'
+  end
+  session['deck'] = @deck.to_cookie
+
+  erb :game
 end
 
 get '/game/bets' do
+  check_player
   erb :make_bets
 end
 
 post '/game/bets' do
+  check_player
   if params['player_bets'].match(/^\d+$/)
     if params['player_bets'].to_i.between?(1,session['player'].money)
       session['player'].bets = params['player_bets'].to_i

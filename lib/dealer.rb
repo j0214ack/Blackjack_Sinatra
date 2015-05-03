@@ -2,8 +2,7 @@
 require_relative 'hand'
 
 class Dealer
-  include HasHand
-  attr_accessor :choice
+  include HasBlackJackHand
 
   def initialize
     @hand = []

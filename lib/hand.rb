@@ -1,13 +1,21 @@
 # encoding: UTF-8
-module HasHand
-  attr_accessor :hand
+module HasBlackJackHand
+  attr_accessor :hand, :choice
+
+  def my_turn?
+    (self.choice == '' || self.choice == 'h') && !self.busted?
+  end
 
   def blackjack?
-    hand.size == 2 && total_points == 21 
+    hand.size == 2 && total_points == 21
   end
 
   def busted?
     total_points > 21
+  end
+
+  def flop_dealt?
+    hand.size >= 2
   end
 
   def total_points
@@ -18,7 +26,7 @@ module HasHand
       aces += 1 if card.to_points == 1
     end
     result += 10 if (aces != 0 && (result + 10 <= 21))
-    result 
+    result
   end
 
   def clear_hand
@@ -30,7 +38,7 @@ module HasHand
     #cards_strings[0] = "🂠 ??" if hide_fisrt_card
     #cards_strings.join(" | ")
   #end
-  
+
   def show_hand(hide_first_card = false)
     cards_urls = hand.map{ |card| card.to_url }
     cards_urls[0] = "/images/cards/cover.jpg" if hide_first_card
@@ -41,4 +49,3 @@ module HasHand
     hand << card
   end
 end
-

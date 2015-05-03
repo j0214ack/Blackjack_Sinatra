@@ -10,7 +10,7 @@ class Card
   end
 
   def to_s
-    "🂠 #{SUITS[suit]}#{face}"
+    "🂠 #{SUITS[suit]}#{face} "
   end
 
   def to_url
@@ -27,18 +27,12 @@ class Card
     end
 
     case face
-    when "A"
-      result += "ace"
-    when "T"
-      result += "10"
-    when "J"
-      result += "jack"
-    when "Q"
-      result += "queen"
-    when "K"
-      result += "king"
-    else
-      result += face
+    when "A" then result += "ace"
+    when "T" then result += "10"
+    when "J" then result += "jack"
+    when "Q" then result += "queen"
+    when "K" then result += "king"
+    else result += face
     end
 
     result = "/images/cards/#{result}.jpg"
@@ -114,7 +108,7 @@ class Deck
   end
 
   def deal_a_card
-    card = cards.select{|card,num| num > 0}.keys.sample
+    card = cards.select{|card, num| num > 0}.keys.sample
     cards[card] -= 1
     card
   end

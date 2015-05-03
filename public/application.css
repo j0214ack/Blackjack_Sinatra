@@ -1,0 +1,9 @@
+.card_img {
+  margin-top: 5px;
+  margin-right: 5px;
+}
+
+.well{
+  background-color: rgb(12, 101, 45);
+  background-color: rgba(12, 101, 45, 0.87);
+}

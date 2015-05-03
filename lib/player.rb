@@ -2,9 +2,9 @@
 require_relative 'hand'
 
 class Player
-  include HasHand
-  attr_accessor :money, :bets, :name, :choice
-  
+  include HasBlackJackHand
+  attr_accessor :money, :bets, :name
+
   def initialize(name,money)
     @hand = []
     @bets = 0
@@ -25,6 +25,11 @@ class Player
 
   def win
     self.money += bets * 2
+    self.bets = 0
+  end
+
+  def lose
+    self.bets = 0
   end
 
 end

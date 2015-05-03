@@ -1,47 +1,44 @@
-<h1>Welcome to game table, <%=session[:player].name%>!</h1>
-<h2>You bet $<%=session[:player].bets%></h2>
+<p>Welcome to game table, <%=session[:player].name%>!</p>
+<p>You have $<%= session[:player].money %> total with you.</p>
 
-<% unless @player_choice == '' %>
-  <h2>You chose <%= @player_choice %> </h2>
-<% end %>
-
-<% if @result_msg %>
-  <%= erb :"partials/result"%>
-<% end %>
-
-<% if session[:game_stage] == GAME_STAGES[:turn_dealer] %>
-  <div class="alert alert-info">
-    Dealer chose to <%= session[:dealer].choice == 'h' ? 'hit' : 'stay' %> !
+<% if @dealer_say %>
+  <div>
+    <p>
+      Dealer: <%= @dealer_say %>
+    </p>
   </div>
 <% end %>
 
-<div class="alert alert-info">
-  It's <%= session[:game_stage] %>
-</div>
-
-<% if @show_continue %>
-  <%= erb :"partials/continue"%>
+<% if @show_result %>
+  <%= erb :"partials/result"%>
+<% else %>
+  <p>You bet $<%=session[:player].bets%></p>
 <% end %>
 
-<br>
+<% if @show_dealer_turn %>
+  <%= erb :"partials/dealer_turn"%>
+<% end %>
 
 <% if session[:dealer] && session[:player] %>
-  <p>
-    Dealer's hand: <br>
-    <% session[:dealer].show_hand(@hide_first_card).each do |card_url| %>
-      <img src="<%= card_url %>" alt="">
-    <% end %>
-    <br>
-    Your hand: <br>
-    <% session[:player].show_hand.each do |card_url| %>
-      <img src="<%= card_url %>" alt="">
-    <% end %>
-    <br>
-  </p>
+  <div>
+    Dealer's hand: (Total: <%= @hide_fisrt_dealer_card ? "??" : session["dealer"].total_points  %>) <br>
+    <div class="well">
+      <% session[:dealer].show_hand(@hide_fisrt_dealer_card).each do |card_url| %>
+        <img src="<%= card_url %>" alt="" class="card_img">
+      <% end %>
+    </div>
+    Your hand: (Total: <%= session['player'].total_points %>)<br>
+    <div class="well">
+      <% session[:player].show_hand.each do |card_url| %>
+        <img src="<%= card_url %>" alt="" class="card_img">
+      <% end %>
+    </div>
+  </div>
 <% end %>
 
-<% if @show_hit_or_stay %>
-  <form action="/game/hit_or_stay" method="post">
+<% if @show_player_turn %>
+  <form action="/game" method="post">
+    <input type="hidden" name="turn" value="player_turn">
     <button type="submit" value="h" name="hit_or_stay">Hit</button>
     <button type="submit" value="s" name="hit_or_stay">Stay</button>
   </form>
