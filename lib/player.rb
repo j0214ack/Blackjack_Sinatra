@@ -3,7 +3,7 @@ require_relative 'hand'
 
 class Player
   include HasBlackJackHand
-  attr_accessor :money, :bets, :name
+  attr_accessor :money, :bets, :name, :choice
 
   def initialize(name,money)
     @hand = []
@@ -11,6 +11,10 @@ class Player
     @money = money.to_i
     @name = name
     @choice = ''
+  end
+
+  def my_turn?
+    (choice == '' || choice == 'h') && !busted?
   end
 
   def bet(amount)

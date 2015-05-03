@@ -64,15 +64,11 @@ end
 class Deck
   attr_accessor :cards, :deck_num
 
-  def new_deck
-    cards = {}
-    Card::SUITS.keys.product(Card::FACES).each do |card|
-      cards[Card.new(*card)] = deck_num
-    end
-    cards
+  def size
+    cards.values.inject(:+)
   end
 
-  def initialize(input = 0)
+  def initialize(input = 4)
     deck_num = input
     @deck_num = deck_num
     @cards = (input == 0) ? {} : new_deck
@@ -95,16 +91,16 @@ class Deck
   end
 
   def self.cookie_construct(cookie_value)
-    new_deck = self.new
-    new_deck.deck_num = deck_num = cookie_value[:deck_num]
+    deck = self.new
+    deck.deck_num = deck_num = cookie_value[:deck_num]
     Card::SUITS.keys.each do |suit|
       feature_value = cookie_value[suit]
       Card::FACES.each do |face|
-        new_deck.cards[Card.new(suit,face)] = feature_value % (deck_num + 1)
+        deck.cards[Card.new(suit,face)] = feature_value % (deck_num + 1)
         feature_value /= (deck_num + 1)
       end
     end
-    new_deck
+    deck
   end
 
   def deal_a_card
@@ -116,4 +112,15 @@ class Deck
   def reset!
     self.cards = new_deck
   end
+
+  private
+
+  def new_deck
+    cards = {}
+    Card::SUITS.keys.product(Card::FACES).each do |card|
+      cards[Card.new(*card)] = deck_num
+    end
+    cards
+  end
+
 end

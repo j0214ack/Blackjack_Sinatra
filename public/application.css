@@ -1,9 +1,17 @@
 .card_img {
-  margin-top: 5px;
   margin-right: 5px;
 }
 
 .well{
   background-color: rgb(12, 101, 45);
   background-color: rgba(12, 101, 45, 0.87);
+}
+
+.alert{
+  font-size: 17.5px;
+  padding: 11px 19px;
+}
+
+.hand_title{
+  font-size: 17.5px;
 }

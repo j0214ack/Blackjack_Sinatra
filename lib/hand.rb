@@ -1,10 +1,6 @@
 # encoding: UTF-8
 module HasBlackJackHand
-  attr_accessor :hand, :choice
-
-  def my_turn?
-    (self.choice == '' || self.choice == 'h') && !self.busted?
-  end
+  attr_accessor :hand
 
   def blackjack?
     hand.size == 2 && total_points == 21

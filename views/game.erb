@@ -1,45 +1,40 @@
-<p>Welcome to game table, <%=session[:player].name%>!</p>
-<p>You have $<%= session[:player].money %> total with you.</p>
-
-<% if @dealer_say %>
-  <div>
-    <p>
-      Dealer: <%= @dealer_say %>
-    </p>
-  </div>
-<% end %>
-
-<% if @show_result %>
-  <%= erb :"partials/result"%>
-<% else %>
-  <p>You bet $<%=session[:player].bets%></p>
-<% end %>
-
-<% if @show_dealer_turn %>
-  <%= erb :"partials/dealer_turn"%>
-<% end %>
-
 <% if session[:dealer] && session[:player] %>
-  <div>
+  <p class="hand_title">
     Dealer's hand: (Total: <%= @hide_fisrt_dealer_card ? "??" : session["dealer"].total_points  %>) <br>
-    <div class="well">
-      <% session[:dealer].show_hand(@hide_fisrt_dealer_card).each do |card_url| %>
-        <img src="<%= card_url %>" alt="" class="card_img">
-      <% end %>
-    </div>
+  </p>
+  <div class="well">
+    <% session[:dealer].show_hand(@hide_fisrt_dealer_card).each do |card_url| %>
+      <img src="<%= card_url %>" alt="" class="card_img">
+    <% end %>
+  </div>
+  <p class="hand_title">
     Your hand: (Total: <%= session['player'].total_points %>)<br>
-    <div class="well">
-      <% session[:player].show_hand.each do |card_url| %>
-        <img src="<%= card_url %>" alt="" class="card_img">
-      <% end %>
-    </div>
+  </p>
+  <div class="well">
+    <% session[:player].show_hand.each do |card_url| %>
+      <img src="<%= card_url %>" alt="" class="card_img">
+    <% end %>
   </div>
 <% end %>
 
 <% if @show_player_turn %>
   <form action="/game" method="post">
     <input type="hidden" name="turn" value="player_turn">
-    <button type="submit" value="h" name="hit_or_stay">Hit</button>
-    <button type="submit" value="s" name="hit_or_stay">Stay</button>
+    <button class="btn btn-danger btn-large" type="submit" value="h" name="hit_or_stay">Hit</button>
+    <button class="btn btn-success btn-large" type="submit" value="s" name="hit_or_stay">Stay</button>
   </form>
+<% end %>
+
+<% if @dealer_say %>
+  <div class="alert alert-info">
+    Dealer: <%= @dealer_say %>
+  </div>
+<% end %>
+
+<% if @show_dealer_turn %>
+  <%= erb :"partials/dealer_turn"%>
+<% end %>
+
+<% if @show_result %>
+  <%= erb :"partials/result"%>
 <% end %>

@@ -4,5 +4,5 @@
   <input type="text" name="player_name" value="<%=@name%>"> <br>
   <span>Money:</span> <br>
   <%= erb(:"partials/input_with_error", locals: { type: "text", name: "player_money" }) %>
-  <input type="submit" value="submit">
+  <button class="btn" type="submit">submit</button>
 </form>

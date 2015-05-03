@@ -11,6 +11,7 @@ set :sessions, true
 helpers do
   def check_player
     redirect '/new_player' unless session['player']
+    redirect '/new_player' if session['player'].bets == 0 && session['player'].money == 0
   end
 
   def check_bets
@@ -21,7 +22,7 @@ helpers do
     if session['deck'] && !new_deck
       @deck = Deck.cookie_construct(session['deck'])
     else
-      @deck = Deck.new(4)
+      @deck = Deck.new(1)
     end
   end
 
@@ -33,8 +34,8 @@ helpers do
   def deal_flop
     all_player_clear_hand
     2.times do
-      session['dealer'].add_a_card(@deck.deal_a_card)
-      session['player'].add_a_card(@deck.deal_a_card)
+      deal_card(session['dealer'], @deck)
+      deal_card(session['player'], @deck)
     end
   end
 
@@ -88,18 +89,33 @@ helpers do
         @show_player_turn = true
       end
     elsif session['player'].my_turn?
-      @show_player_turn = true
-    elsif session['dealer'].my_turn?
-      @show_dealer_turn = true
+      if session['dealer'].blackjack?
+        @dealer_say = "Sorry! I have blackjack!"
+        result
+      elsif session['player'].total_points == 21
+        @dealer_say = "Great! You've hit 21 points. It's my turn now."
+        @show_dealer_turn = true
+        @hide_fisrt_dealer_card = false
+      else
+        @show_player_turn = true
+      end
     elsif session["ending_round"]
       result
+    else #dealer turn
+      case session["dealer"].choice
+      when '' then @dealer_say = "It's my turn."
+      when 'h' then @dealer_say = "I chose to hit."
+      when 's' then @dealer_say = "I chose to stay."
+      end
+      @show_dealer_turn = true
+      @hide_fisrt_dealer_card = false
     end
   end
 
   def dealer_turn
     @hide_fisrt_dealer_card = false
     if session['dealer'].hit_or_stay == 'h'
-      session['dealer'].add_a_card(@deck.deal_a_card)
+      deal_card(session['dealer'], @deck)
       if session['dealer'].busted?
         @dealer_say = "I chose to hit.\n Oops, I am busted."
         @show_result = true
@@ -124,11 +140,15 @@ helpers do
         @dealer_say = "You've already chose to stay. Don't cheat!"
         continue_on_gaming
       else
-        session['player'].add_a_card(@deck.deal_a_card)
+        deal_card(session["player"], @deck)
         if session['player'].busted?
           @dealer_say = "You're busted! You lost."
           session['player'].choice = "s"
           result
+        elsif session['player'].total_points == 21
+          @dealer_say = "Great! You've hit 21 points. It's my turn now."
+          @show_dealer_turn = true
+          @hide_fisrt_dealer_card = false
         else
           @show_player_turn = true
           session['player'].choice = 'h'
@@ -138,7 +158,16 @@ helpers do
       session['player'].choice = 's'
       @dealer_say = "You chose to stay. Then it's my turn."
       @show_dealer_turn = true
+      @hide_fisrt_dealer_card = false
     end
+  end
+
+  def deal_card(receiver, deck)
+    if deck.size < 10
+      @dealer_say = "Too few cards in the deck, preparing an new one.."
+      deck.reset!
+    end
+    receiver.add_a_card(deck.deal_a_card)
   end
 
 end # helpers do
@@ -215,7 +244,9 @@ post '/game/bets' do
   check_player
   if params['player_bets'].match(/^\d+$/)
     if params['player_bets'].to_i.between?(1,session['player'].money)
-      session['player'].bets = params['player_bets'].to_i
+      bets = params['player_bets'].to_i
+      session['player'].bets = bets
+      session['player'].money -= bets
       redirect '/game'
     end
   end
