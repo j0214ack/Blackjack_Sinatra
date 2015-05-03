@@ -86,6 +86,10 @@ helpers do
       if session['dealer'].blackjack?
         @dealer_say = "Sorry! I have blackjack!"
         result
+      elsif session['player'].total_points == 21
+        @dealer_say = "Great! You've hit 21 points. It's my turn now."
+        @show_dealer_turn = true
+        @hide_fisrt_dealer_card = false
       else
         @show_player_turn = true
       end
