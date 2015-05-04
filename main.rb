@@ -6,8 +6,9 @@ require_relative 'lib/player'
 require_relative 'lib/deck_and_card'
 require_relative 'lib/dealer'
 
-set :sessions, true
-set :protection, except: :session_hijacking
+use Rack::Session::Cookie :key => 'rack.session',
+                          :path => '/',
+                          :secret => 'aaabbc_tlbj'
 
 helpers do
   def check_player
