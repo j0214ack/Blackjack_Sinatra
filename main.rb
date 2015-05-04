@@ -11,8 +11,8 @@ set :protection, except: :session_hijacking
 
 helpers do
   def check_player
-    redirect '/new_player' unless session['player']
-    redirect '/new_player' if session['player'].bets == 0 && session['player'].money == 0
+    redirect '/player/new' unless session['player']
+    redirect '/player/broke' if session['player'].broke?
   end
 
   def check_bets
@@ -23,7 +23,7 @@ helpers do
     if session['deck'] && !new_deck
       @deck = Deck.cookie_construct(session['deck'])
     else
-      @deck = Deck.new(1)
+      @deck = Deck.new(4)
     end
   end
 
@@ -79,31 +79,29 @@ helpers do
     session['player'].choice = ''
   end
 
+  def check_before_player_turn
+    if session['dealer'].blackjack?
+      @dealer_say = "Sorry! I have blackjack!"
+      result
+    elsif session['player'].busted?
+      @dealer_say = "You're busted! You lost."
+      result
+    elsif session['player'].total_points == 21
+      @dealer_say = "Great! You've hit 21 points. It's my turn now."
+      @show_dealer_turn = true
+      @hide_fisrt_dealer_card = false
+    else
+      @show_player_turn = true
+    end
+  end
+
   def continue_on_gaming
     session['dealer'] = Dealer.new unless session['dealer']
     if !session['player'].flop_dealt? || !session['dealer'].flop_dealt?
       deal_flop
-      if session['dealer'].blackjack?
-        @dealer_say = "Sorry! I have blackjack!"
-        result
-      elsif session['player'].total_points == 21
-        @dealer_say = "Great! You've hit 21 points. It's my turn now."
-        @show_dealer_turn = true
-        @hide_fisrt_dealer_card = false
-      else
-        @show_player_turn = true
-      end
+      check_before_player_turn
     elsif session['player'].my_turn?
-      if session['dealer'].blackjack?
-        @dealer_say = "Sorry! I have blackjack!"
-        result
-      elsif session['player'].total_points == 21
-        @dealer_say = "Great! You've hit 21 points. It's my turn now."
-        @show_dealer_turn = true
-        @hide_fisrt_dealer_card = false
-      else
-        @show_player_turn = true
-      end
+      check_before_player_turn
     elsif session["ending_round"]
       result
     else #dealer turn
@@ -123,7 +121,6 @@ helpers do
       deal_card(session['dealer'], @deck)
       if session['dealer'].busted?
         @dealer_say = "I chose to hit.\n Oops, I am busted."
-        @show_result = true
         result
       else
         @dealer_say = "I chose to hit."
@@ -131,7 +128,6 @@ helpers do
       end
     elsif session['dealer'].hit_or_stay == 's'
       @dealer_say = "I chose to stay."
-      @show_result = true
       result
     end
   end
@@ -146,18 +142,8 @@ helpers do
         continue_on_gaming
       else
         deal_card(session["player"], @deck)
-        if session['player'].busted?
-          @dealer_say = "You're busted! You lost."
-          session['player'].choice = "s"
-          result
-        elsif session['player'].total_points == 21
-          @dealer_say = "Great! You've hit 21 points. It's my turn now."
-          @show_dealer_turn = true
-          @hide_fisrt_dealer_card = false
-        else
-          @show_player_turn = true
-          session['player'].choice = 'h'
-        end
+        session['player'].choice = 'h'
+        check_before_player_turn
       end
     elsif params['hit_or_stay'] == 's'
       session['player'].choice = 's'
@@ -177,8 +163,14 @@ helpers do
 
 end # helpers do
 
-before do
+before "/game*" do
+  check_player
   @hide_fisrt_dealer_card = true
+end
+
+before "/game" do
+  check_bets
+  build_deck
 end
 
 get '/' do
@@ -186,11 +178,32 @@ get '/' do
   erb :index
 end
 
-get '/new_player' do
+get '/player/broke' do
+  redirect "/player/new" unless session['player']
+  redirect "/game" unless session['player'].broke?
+
+  erb :player_broke
+end
+
+post '/player/broke' do
+  redirect "/player/new" unless session['player']
+  redirect "/game" unless session['player'].broke?
+  money = params[:player_money]
+  if money.match(/^\d+$/) && money.to_i > 0
+    session['player'].money = money.to_i
+    redirect '/game/bets'
+  else
+    @input_error = "You must enter a positive number for your money."
+    @name = name
+    erb :player_broke
+  end
+end
+
+get '/player/new' do
   erb :new_player
 end
 
-post '/new_player' do
+post '/player/new' do
   name = params[:player_name].strip
   money = params[:player_money]
   if money.match(/^\d+$/) && money.to_i > 0
@@ -204,9 +217,6 @@ post '/new_player' do
 end
 
 get '/game' do
-  check_player
-  check_bets
-  build_deck
   continue_on_gaming
   session['deck'] = @deck.to_cookie
 
@@ -214,7 +224,6 @@ get '/game' do
 end
 
 post '/game/new' do
-  check_player
   if session['ending_round'] == true
     session['ending_round'] = false
     all_player_clear_hand
@@ -225,9 +234,6 @@ post '/game/new' do
 end
 
 post '/game' do
-  check_player
-  check_bets
-  build_deck
   if params['turn'] == "player_turn"
     player_turn
   elsif params['turn'] == "dealer_turn"
@@ -241,12 +247,11 @@ post '/game' do
 end
 
 get '/game/bets' do
-  check_player
   erb :make_bets
 end
 
 post '/game/bets' do
-  check_player
+  all_player_clear_hand
   if params['player_bets'].match(/^\d+$/)
     if params['player_bets'].to_i.between?(1,session['player'].money)
       bets = params['player_bets'].to_i

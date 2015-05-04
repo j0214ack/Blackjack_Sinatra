@@ -13,6 +13,10 @@ class Player
     @choice = ''
   end
 
+  def broke?
+    bets == 0 && money == 0
+  end
+
   def my_turn?
     (choice == '' || choice == 'h') && !busted?
   end

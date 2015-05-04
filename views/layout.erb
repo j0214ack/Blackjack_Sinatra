@@ -11,7 +11,7 @@
         <div class="navbar-inner">
           <ul class="nav">
             <li><a href="/">Lobby</a></li>
-            <li><a href="/new_player">New Player</a></li>
+            <li><a href="/player/new">New Player</a></li>
             <% if session['player'] %>
             <li><a href="#"><%= session['player'].name %></a></li>
             <li><a href="#">Money: <%= session['player'].money %>$</a></li>

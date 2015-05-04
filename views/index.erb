@@ -1,4 +1,6 @@
 <h1>Hello <%= session[:player].name %>!</h1>
 <h1>You Have $<%= session[:player].money %></h1>
-<form action="/new_player" method="get"><button type="submit">New player</button></form>
-<form action="/game" method="get"><button type="submit">Continue on playing</button></form>
+<button class="btn"><a href="/player/new">New Player</a></button>
+<button class="btn"><a href="/game">Continue on playing</a></button>
+<!-- <form action="/player/new" method="get"><button type="submit">New player</button></form>
+<form action="/game" method="get"><button type="submit">Continue on playing</button></form> -->

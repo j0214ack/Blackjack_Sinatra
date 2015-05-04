@@ -1,0 +1,10 @@
+<h1>Sorry, <%= session['player'].name %>. You are broke!</h1>
+
+<h2>You can:</h2>
+<form class="" action="/player/broke" method="post">
+  <span>1. Add more money:</span> <br>
+  <%= erb(:"partials/input_with_error", locals: { type: "text", name: "player_money" }) %>
+  <button class="btn" type="submit">submit</button>
+</form>
+<span>2. Start as a new player</span> <br>
+<button class="btn"><a href="/player/new">New Player</a></button>
