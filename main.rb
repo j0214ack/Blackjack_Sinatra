@@ -28,8 +28,8 @@ helpers do
   end
 
   def all_player_clear_hand
-    session['dealer'].clear_hand
-    session['player'].clear_hand
+    session['dealer'].clear_hand if session['dealer']
+    session['player'].clear_hand if session['player']
   end
 
   def deal_flop
